@@ -1,14 +1,22 @@
 services:
   app:
-    build: .
+    build: ./services/api_bus
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - ./services/api_bus/.env
     depends_on:
       - db
+      - parser-service
+      - ai-service
     volumes:
-      - .:/app
+      - ./services/api_bus:/app
+
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - PARSER_URL=http://parser-service:5001
+      - AI_URL=http://ai-service:5002
 
   db:
     image: pgvector/pgvector:pg16
@@ -19,3 +27,30 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  parser-service:
+    build: ./services/parser
+    ports:
+      - "5001:5001"
+
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+    volumes:
+      - ./services/parser:/app
+
+  ai-service:
+    build: ./services/ai_model
+    ports:
+      - "5002:5002"
+
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+    volumes:
+      - ./services/ai_model:/app
+
+volumes:
+  postgres_data:
