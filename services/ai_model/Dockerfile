@@ -3,4 +3,4 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 COPY . .
-CMD ["uvicorn", "model_main:app", "--host", "0.0.0.0", "--port", "5002", "--reload"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5002", "--reload"]

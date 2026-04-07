@@ -4,7 +4,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./services/api_bus/.env
+      - .env
     depends_on:
       - db
       - parser-service
@@ -21,6 +21,8 @@ services:
   db:
     image: pgvector/pgvector:pg16
     container_name: my_postgres
+    env_file:
+      - .env
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -28,6 +30,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      - ./services/api_bus/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
 
   parser-service:
