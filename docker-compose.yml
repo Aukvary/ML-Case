@@ -4,7 +4,7 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./services/api_bus/.env
+      - .env
     depends_on:
       - db
       - parser-service
@@ -15,12 +15,12 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      - PARSER_URL=http://parser-service:5001
-      - AI_URL=http://ai-service:5002
 
   db:
     image: pgvector/pgvector:pg16
     container_name: my_postgres
+    env_file:
+      - .env
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -28,6 +28,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      - ./services/api_bus/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
 
   parser-service:
@@ -35,6 +36,8 @@ services:
     ports:
       - "5001:5001"
 
+    env_file:
+      - .env
     environment:
       - CHOKIDAR_USEPOLLING=true
 
