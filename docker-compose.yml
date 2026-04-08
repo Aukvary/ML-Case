@@ -49,6 +49,9 @@ services:
     ports:
       - "5002:5002"
 
+    env_file:
+      - .env
+
     environment:
       - CHOKIDAR_USEPOLLING=true
 

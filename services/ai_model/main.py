@@ -25,7 +25,7 @@ async def verify(app_secret: str = Header(None, alias="App-Secret")):
 # health-check
 @app.get("/")
 def read_root():
-    return {"service": "model", "status": "active"}
+    return {"service": "model", "status": INTERNAL_API_KEY}
 
 # model-info
 @app.get("/model-info")
