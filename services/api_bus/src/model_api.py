@@ -13,7 +13,8 @@ class VectorInfo:
 async def get_vector_dim():
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(f"{ai_url}/model-info", headers=headers, timeout=5.0)
+            print(f'\t\t\t{ai_url}')
+            response = await client.get(f"{ai_url}/model-info", headers=headers, timeout=20.0)
             response.raise_for_status()
             VectorInfo.dim = response.json()["vector_dim"]
             return VectorInfo.dim

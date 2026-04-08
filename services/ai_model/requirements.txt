@@ -1,6 +1,8 @@
-fastapi>=0.115.0
-uvicorn>=0.30.0
-pydantic>=2.0.0
+fastapi==0.115.0
+uvicorn==0.30.0
+pydantic==2.5.0
 python-dotenv==1.0.1
-sentence-transformers==2.5.1
-numpy<2.0.0
+sentence-transformers==2.7.0
+numpy==2.0.2
+transformers==4.46.3
+torch==2.5.1

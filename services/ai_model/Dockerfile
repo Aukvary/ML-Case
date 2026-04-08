@@ -12,7 +12,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir --default-timeout=1000 -r requirements.txt
+
+RUN pip install --no-cache-dir \
+    --default-timeout=3000 \
+    --retries=10 \
+    --timeout=3000 \
+    -r requirements.txt
 
 COPY . .
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5002"]

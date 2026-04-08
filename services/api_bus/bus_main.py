@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from src.model_api import router as model_router, get_vector_dim, init_db
+from src.model_api import VectorInfo
 
 
 @asynccontextmanager
@@ -16,3 +17,7 @@ app.include_router(model_router)
 @app.get("/")
 def read_root():
     return {"message": "Bus API is active"}
+
+@app.get("/dim/")
+def get_dim():
+    return {"message": f"{VectorInfo.dim}"}
