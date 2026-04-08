@@ -4,7 +4,7 @@ import os
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from src.cfg import front_url
-from model_api import file_to_vec
+from src.model_api import file_to_vec
 
 router = APIRouter(prefix="/front", tags=["Front Interaction"])
 
