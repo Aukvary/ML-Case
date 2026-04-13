@@ -1,13 +1,16 @@
 import psycopg
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime
 from fastapi import APIRouter
 from psycopg import sql
 from pydantic import BaseModel
 from src.cfg import db_url
-from src.model_api import ModelInfo
 from passlib.context import CryptContext
 
 router = APIRouter(prefix="/db", tags=["Data Base Interaction"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+Base = declarative_base()
 
 
 class User(BaseModel):
@@ -29,18 +32,29 @@ class UserAlreadyExistsError(UserError):
         self.user = user
         super().__init__(user, "Пользователь с таким именем уже зарегистрирован")
 
-def init_db():
+
+class LocalFile:
+    def __init__(self, title, path, content_type, size, embedding=None):
+        self.title = title
+        self.path = path
+        self.content_type = content_type
+        self.size = size
+        self.embedding = embedding
+
+def init_db(dim: int):
     with psycopg.connect(db_url) as conn:
         with conn.cursor() as cur:
             cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
             cur.execute(f"""
                     CREATE TABLE IF NOT EXISTS documents (
-                        title TEXT UNIQUE, 
+                        title TEXT PRIMARY KEY, 
                         path TEXT,
-                        embedding vector({ModelInfo.dim})
+                        content_type TEXT,
+                        size INTEGER,
+                        embedding vector({dim})
                     );
                 """
-                        )
+            )
 
             cur.execute("""
                     CREATE TABLE IF NOT EXISTS users (
@@ -50,7 +64,7 @@ def init_db():
                     role VARCHAR(20) DEFAULT 'user'
                     );
                 """
-                        )
+            )
             conn.commit()
 
 def compare_request(word_vec: list[float]):
