@@ -1,5 +1,5 @@
+import typing
 import httpx
-import psycopg
 import os
 from fastapi import APIRouter, HTTPException
 from src.cfg import db_url, ai_url
@@ -7,35 +7,45 @@ from src.cfg import db_url, ai_url
 router = APIRouter(prefix="/model", tags=["AI Model Interaction"])
 headers = {"App-Secret": os.getenv("INTERNAL_API_KEY")}
 
-class VectorInfo:
-    dim: int = 768
-
-async def get_vector_dim():
-    async with httpx.AsyncClient() as client:
-        try:
-            print(f'\t\t\t{ai_url}')
-            response = await client.get(f"{"http://ai-service:5002"}/model-info", headers=headers, timeout=20.0)
-            response.raise_for_status()
-            VectorInfo.dim = response.json()["vector_dim"]
-            return VectorInfo.dim
-        except Exception as e:
-            print(f"[ERROR]\t Connection to AI-service failed: {e}")
-            return VectorInfo.dim
-
-def init_db(dim: int):
-    with psycopg.connect(db_url) as conn:
-        with conn.cursor() as cur:
-            cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
-            cur.execute(f"CREATE TABLE IF NOT EXISTS documents (id SERIAL PRIMARY KEY, content TEXT, embedding vector({dim}));")
-            conn.commit()
-            print(f"--- DB INITIALIZED WITH DIM: {dim} ---")
+class ModelInfo:
+    init: bool = False
+    dim: int = 384
 
 @router.get("/status")
 async def model_status():
-    return {"status": "ready"}
+    if ModelInfo.init:
+        return {
+            "status": "has initialized",
+            "dim": ModelInfo.dim
+        }
 
-async def file_to_vec(text) -> tuple[int]:
+    return {
+        "status": "hasn't initialize",
+        "dim": "NA"
+    }
+
+
+
+async def init_model_info():
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(
+                f"{ai_url}/model-info", headers=headers, timeout=20.0
+            )
+            response.raise_for_status()
+
+            model_info = response.json()
+
+            ModelInfo.init = True
+            ModelInfo.dim = model_info["vector_dim"]
+        except Exception as e:
+            print(f"[ERROR]\t Connection to AI-service failed: {e}")
+
+
+
+async def file_to_vec(text) -> list[float]:
     pass
 
-async def request_to_vec(text) -> tuple[int]:
+
+async def request_to_vec(text) -> list[float]:
     pass
