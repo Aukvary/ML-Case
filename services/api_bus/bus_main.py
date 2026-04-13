@@ -1,19 +1,21 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from src.model_api import router as model_router, get_vector_dim, init_db, VectorInfo
+from src.model_api import router as model_router, init_model_info, ModelInfo
 from src.front_api import router as front_router
+from src.db_api import router as db_router, init_db
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    dim = await get_vector_dim()
-    init_db(dim)
+    await init_model_info()
+    init_db()
     yield
 
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(model_router)
 app.include_router(front_router)
+app.include_router(db_router)
 
 @app.get("/")
 def read_root():
@@ -21,4 +23,4 @@ def read_root():
 
 @app.get("/dim/")
 def get_dim():
-    return {"message": f"{VectorInfo.dim}"}
+    return {"message": f"{ModelInfo.dim}"}
