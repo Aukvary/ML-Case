@@ -13,7 +13,6 @@ INTERNAL_API_KEY = os.getenv("INTERNAL_API_KEY")
 embedder = None
 model_ready = False
 
-
 # Фоновая инициализация
 def load_model_task():
     global embedder, model_ready
