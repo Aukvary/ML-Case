@@ -20,7 +20,3 @@ app.include_router(db_router)
 @app.get("/")
 def read_root():
     return {"message": "Bus API is active"}
-
-@app.get("/dim/")
-def get_dim():
-    return {"message": f"{ModelInfo.dim}"}
