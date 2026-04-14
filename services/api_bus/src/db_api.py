@@ -1,6 +1,5 @@
+import aiofiles
 import psycopg
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from fastapi import APIRouter
 from psycopg import sql
@@ -10,7 +9,7 @@ from passlib.context import CryptContext
 
 router = APIRouter(prefix="/db", tags=["Data Base Interaction"])
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-Base = declarative_base()
+files_path = '/app/files'
 
 
 class User(BaseModel):
@@ -18,28 +17,30 @@ class User(BaseModel):
     username: str
     role: str
 
+
 class SearchResponse(BaseModel):
     title: str
     path: str
 
+
 class UserError(Exception):
-    def __init__(self, user:str = None, message: str = None):
+    def __init__(self, user: str = None, message: str = None):
         self.user = user
         self.message = message
 
+
 class UserAlreadyExistsError(UserError):
-    def __init__(self, user:str = None):
+    def __init__(self, user: str = None):
         self.user = user
         super().__init__(user, "Пользователь с таким именем уже зарегистрирован")
 
 
 class LocalFile:
-    def __init__(self, title, path, content_type, size, embedding=None):
+    def __init__(self, title, path, embedding=None):
         self.title = title
         self.path = path
-        self.content_type = content_type
-        self.size = size
         self.embedding = embedding
+
 
 def init_db(dim: int):
     with psycopg.connect(db_url) as conn:
@@ -53,8 +54,7 @@ def init_db(dim: int):
                         size INTEGER,
                         embedding vector({dim})
                     );
-                """
-            )
+                """)
 
             cur.execute("""
                     CREATE TABLE IF NOT EXISTS users (
@@ -63,9 +63,9 @@ def init_db(dim: int):
                     password_hash VARCHAR(255) NOT NULL,
                     role VARCHAR(20) DEFAULT 'user'
                     );
-                """
-            )
+                """)
             conn.commit()
+
 
 def compare_request(word_vec: list[float]):
     with psycopg.connect(db_url) as conn:
@@ -86,25 +86,29 @@ def compare_request(word_vec: list[float]):
 
 
 def add_user(username: str, password: str):
-    password_hash = pwd_context.hash(password)
     try:
         with psycopg.connect(db_url) as conn:
             with conn.cursor() as cur:
-                cur.execute("""
+                cur.execute(
+                    """
                     INSERT INTO users (username, password_hash)
                     VALUES (%s, %s)
-                """, (username, password_hash))
+                """,
+                    (username, password),
+                )
                 conn.commit()
     except psycopg.errors.UniqueViolation:
         raise UserAlreadyExistsError(username)
     except Exception as e:
         raise UserError(username, str(e))
 
+
 def update_user(
-        username: str,
-        new_username: str | None = None,
-        new_password: str | None = None,
-        new_role: str | None = None):
+    username: str,
+    new_username: str | None = None,
+    new_password: str | None = None,
+    new_role: str | None = None,
+):
     updates = []
     params = []
 
@@ -127,9 +131,7 @@ def update_user(
         UPDATE users 
         SET {updates}
         WHERE username = %s
-    """).format(
-        updates=sql.SQL(', ').join(map(sql.SQL, updates))
-    )
+    """).format(updates=sql.SQL(", ").join(map(sql.SQL, updates)))
 
     try:
         with psycopg.connect(db_url) as conn:
@@ -145,11 +147,14 @@ def update_user(
 def check_auth(username: str, password: str) -> User | None:
     with psycopg.connect(db_url) as conn:
         with conn.cursor() as cur:
-            cur.execute("""
+            cur.execute(
+                """
                 SELECT id, username, password_hash, role
                 FROM users 
                 WHERE username = %s
-            """, (username,))
+            """,
+                (username,),
+            )
 
             user = cur.fetchone()
             if not user:
@@ -162,16 +167,20 @@ def check_auth(username: str, password: str) -> User | None:
 
             return User(id=user_id, username=db_username, role=role)
 
+
 def get_all_users() -> list[User]:
     with psycopg.connect(db_url) as conn:
         with conn.cursor() as cur:
             cur.execute("""
                     SELECT id, username, role
                     FROM users
-                    ORDER BY id
-                """
-            )
+                    ORDER BY username
+                """)
 
             users = cur.fetchall()
 
             return [User(id=u[0], username=u[1], role=u[2]) for u in users]
+
+def upload_file(title: str, content):
+    with aiofiles.open(files_path, 'wb') as out_file:
+        out_file.write(content)
