@@ -1,4 +1,5 @@
-from fastapi import APIRouter, status, HTTPException
+from fastapi import APIRouter, status, HTTPException, UploadFile
+from fastapi.params import File
 from pydantic import BaseModel
 from src.db_api import (
     User,
@@ -8,14 +9,11 @@ from src.db_api import (
     check_auth as db_check_auth,
     UserAlreadyExistsError,
     UserError,
-    compare_request
-)
-from src.model_api import (
-    request_to_vec
+    compare_request,
+    upload_file as db_upload_file
 )
 
 router = APIRouter(prefix="/front", tags=["Front Interaction"])
-
 
 class SearchRequest(BaseModel):
     request: str
@@ -27,6 +25,12 @@ class FileUploadRequest(BaseModel):
 
 @router.post("/register_user")
 def register_user(username: str, password: str):
+    if not username or not username.strip():
+        raise ValueError("Username cannot be empty")
+
+    if not password or not password.strip():
+        raise ValueError("Password cannot be empty")
+
     try:
         db_add_user(username, password)
         return {"status": "User registered", "username": username}
@@ -44,6 +48,7 @@ def register_user(username: str, password: str):
         )
 
     except Exception as e:
+        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
@@ -58,8 +63,6 @@ def update_user(
         new_role: str | None = None):
     if (new_username is None) and (new_password is None) and (new_role is None):
         return
-
-    #TODO: добавить верификацию меняющего
 
     try:
         db_update_user(username, new_username, new_password, new_role)
@@ -87,7 +90,7 @@ def check_auth(username: str, password: str):
     if not user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Invalid user data"
+            detail="Invalid user data"
         )
     return user
 
@@ -107,5 +110,15 @@ def get_all_users():
 
 @router.post("/search_request")
 async def search_request(request: SearchRequest):
+    from src.model_api import request_to_vec
     request_vec = await request_to_vec(request.request)
     return compare_request(request_vec)
+
+@router.post("/upload_file")
+async def upload_file(file: UploadFile = File(...)):
+    try:
+        file_content = await file.read()
+        db_upload_file(file.filename, file_content)
+
+    except Exception as e:
+        pass

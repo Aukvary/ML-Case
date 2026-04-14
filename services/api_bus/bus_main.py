@@ -8,7 +8,7 @@ from src.db_api import router as db_router, init_db
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_model_info()
-    init_db()
+    init_db(ModelInfo.dim)
     yield
 
 

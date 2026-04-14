@@ -6,12 +6,9 @@ services:
     env_file:
       - .env
     depends_on:
-      db:
-        condition: service_started
-      parser-service:
-        condition: service_started
-      ai-service:
-        condition: service_healthy
+      - db
+      - parser-service
+      - ai-service
     volumes:
       - ./services/api_bus:/app
 
@@ -60,13 +57,5 @@ services:
 
     volumes:
       - ./services/ai_model:/app
-
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:5002/" ]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-      start_period: 120s
-
 volumes:
   postgres_data:
