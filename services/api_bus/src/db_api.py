@@ -1,6 +1,5 @@
 import aiofiles
 import psycopg
-from datetime import datetime
 from fastapi import APIRouter
 from psycopg import sql
 from pydantic import BaseModel
@@ -20,7 +19,6 @@ class User(BaseModel):
 
 class SearchResponse(BaseModel):
     title: str
-    path: str
 
 
 class UserError(Exception):
@@ -31,8 +29,18 @@ class UserError(Exception):
 
 class UserAlreadyExistsError(UserError):
     def __init__(self, user: str = None):
-        self.user = user
         super().__init__(user, "Пользователь с таким именем уже зарегистрирован")
+
+
+class FileError(Exception):
+    def __init__(self, title: str = None, message: str = None):
+        self.title = title
+        self.message = message
+
+
+class FileAlreadyExistsError(FileError):
+    def __init__(self, title: str = None):
+        super().__init__(title, "Файл с таким именем уже существует")
 
 
 class LocalFile:
@@ -49,9 +57,6 @@ def init_db(dim: int):
             cur.execute(f"""
                     CREATE TABLE IF NOT EXISTS documents (
                         title TEXT PRIMARY KEY, 
-                        path TEXT,
-                        content_type TEXT,
-                        size INTEGER,
                         embedding vector({dim})
                     );
                 """)
@@ -73,7 +78,6 @@ def compare_request(word_vec: list[float]):
             query = """
                 SELECT 
                     title, 
-                    path
                 FROM documents
                 WHERE embedding <=> %s::vector < 1
                 ORDER BY embedding <=> %s::vector ASC
@@ -93,9 +97,7 @@ def add_user(username: str, password: str):
                     """
                     INSERT INTO users (username, password_hash)
                     VALUES (%s, %s)
-                """,
-                    (username, password),
-                )
+                """, (username, password), )
                 conn.commit()
     except psycopg.errors.UniqueViolation:
         raise UserAlreadyExistsError(username)
@@ -104,10 +106,10 @@ def add_user(username: str, password: str):
 
 
 def update_user(
-    username: str,
-    new_username: str | None = None,
-    new_password: str | None = None,
-    new_role: str | None = None,
+        username: str,
+        new_username: str | None = None,
+        new_password: str | None = None,
+        new_role: str | None = None,
 ):
     updates = []
     params = []
@@ -181,6 +183,24 @@ def get_all_users() -> list[User]:
 
             return [User(id=u[0], username=u[1], role=u[2]) for u in users]
 
-def upload_file(title: str, content):
-    with aiofiles.open(files_path, 'wb') as out_file:
-        out_file.write(content)
+
+async def upload_file(title: str, content, vec: list[float]):
+    try:
+        with psycopg.connect(db_url) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    INSERT INTO documents (title, embedding)
+                    VALUES (%s, %s)
+                    """,
+                    (title, vec))
+                conn.commit()
+
+    except psycopg.errors.UniqueViolation:
+        raise FileAlreadyExistsError(title)
+    except Exception as e:
+        print(e)
+        raise FileError(title, str(e))
+
+    async with aiofiles.open(f'{files_path}/{title}', mode='wb') as file:
+        await file.write(content)
