@@ -1,7 +1,6 @@
-import typing
 import httpx
 import os
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 import asyncio
 from src.cfg import ai_url
 
@@ -41,9 +40,9 @@ async def init_model_info():
                 await asyncio.sleep(2)
 
 
-async def file_to_vec(text) -> list[float]:
-    pass
+async def file_to_vec(text: str) -> list[float]:
+    return [0.0 for _ in range(ModelInfo.dim)]
 
 
 async def request_to_vec(text) -> list[float]:
-    pass
+    return [0.0 for _ in range(ModelInfo.dim)]

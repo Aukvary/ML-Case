@@ -1,6 +1,7 @@
-from fastapi import APIRouter, status, HTTPException, UploadFile
+from fastapi import APIRouter, status, HTTPException, UploadFile, Form
 from fastapi.params import File
 from pydantic import BaseModel
+from src.parser_api import parse_file
 from src.db_api import (
     User,
     get_all_users as db_get_all_users,
@@ -10,7 +11,7 @@ from src.db_api import (
     UserAlreadyExistsError,
     UserError,
     compare_request,
-    upload_file as db_upload_file
+    upload_file as db_upload_file, FileAlreadyExistsError
 )
 
 router = APIRouter(prefix="/front", tags=["Front Interaction"])
@@ -99,13 +100,13 @@ def check_auth(username: str, password: str):
 def get_all_users():
     users: list[User] = db_get_all_users()
 
-    return {
-        user.id: {
+    return [
+        {
+            "id": user.id,
             "username": user.username,
             "role": user.role
-        }
-        for user in users
-    }
+        } for user in users
+    ]
 
 
 @router.post("/search_request")
@@ -116,9 +117,23 @@ async def search_request(request: SearchRequest):
 
 @router.post("/upload_file")
 async def upload_file(file: UploadFile = File(...)):
+    from src.model_api import file_to_vec
     try:
         file_content = await file.read()
-        db_upload_file(file.filename, file_content)
+        embedding = await file_to_vec(parse_file(file_content))
+        await db_upload_file(file.filename, file_content, embedding)
 
+        return {
+            "status": "File uploaded"
+        }
+
+    except FileAlreadyExistsError:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"File '{file.filename}' already exists"
+        )
     except Exception as e:
-        pass
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Internal server error: {e}"
+        )
