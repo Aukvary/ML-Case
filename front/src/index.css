@@ -1,0 +1,349 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Helvetica, sans-serif;
+  color: #cfcfcf;
+}
+
+/*-----------------|   BACKGROUND ANIMATION   |-----------------*/
+
+body, html, #root {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  background: #101020;
+  position: relative;
+  overflow-x: hidden;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(3px 3px at 20% 30%, rgba(180,180,255,1), rgba(0,0,0,0) 80%),
+    radial-gradient(2px 2px at 60% 70%, rgba(200,200,255,1), rgba(0,0,0,0) 80%),
+    radial-gradient(4px 4px at 80% 20%, rgba(220,220,255,1), rgba(0,0,0,0) 80%),
+    radial-gradient(2px 2px at 40% 85%, rgba(180,180,255,1), rgba(0,0,0,0) 80%),
+    radial-gradient(5px 5px at 90% 45%, rgba(160,160,255,0.9), rgba(0,0,0,0) 80%),
+    radial-gradient(1px 1px at 15% 55%, rgba(255,255,255,1), rgba(0,0,0,0) 80%),
+    radial-gradient(3px 3px at 75% 15%, rgba(200,200,255,1), rgba(0,0,0,0) 80%),
+    radial-gradient(2px 2px at 45% 95%, rgba(255,255,255,1), rgba(0,0,0,0) 80%),
+    radial-gradient(2px 2px at 30% 45%, rgba(190,190,255,1), rgba(0,0,0,0) 80%),
+    radial-gradient(4px 4px at 85% 65%, rgba(170,170,255,0.9), rgba(0,0,0,0) 80%);
+  background-repeat: repeat;
+  background-size: 600px 600px, 450px 450px, 700px 700px, 500px 500px, 800px 800px,
+                   350px 350px, 550px 550px, 400px 400px, 480px 480px, 650px 650px;
+  animation: starsFall 8s linear infinite;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(160,160,255,1)) 
+          drop-shadow(0 0 20px rgba(100,100,200,0.7));
+  opacity: 0.9;
+}
+
+@keyframes starsFall {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+  100% {
+    background-position: 0 600px, 0 450px, 0 700px, 0 500px, 0 800px,
+                         0 350px, 0 550px, 0 400px, 0 480px, 0 650px;
+  }
+}
+
+@keyframes starsPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+
+/*-----------------|   MENUS   |-----------------*/
+
+.headerMain {
+  width:100%;
+  height:80px;
+  border-bottom: 2px solid #333345;
+  display: flex;
+  align-items: center;
+  background-color: #20202f;
+  overflow: hidden;
+  justify-content: space-between;
+  box-shadow: 0px 15px 30px #030310;
+}
+
+.bodyMenu {
+  display:flex;
+  width: 300px;
+  height: 100%;
+  background-color: #20202f;
+  border-right: 2px solid #333345;
+  align-items: center;
+  flex-direction: column;
+  box-shadow: 15px 30px 30px #030310;
+}
+
+.bodyMenuM {
+  width:100%;
+  display:flex;
+  height: calc(100% - 80px);
+}
+
+/*-----------------|   CONTAINER   |-----------------*/
+
+.container {
+  width: 100%;
+  height: 100%;
+  padding-top: 200px;
+}
+
+.finderContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.browContainer {
+  width: 100%;
+  padding: 15px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.filesContainer{
+  display: flex;
+  flex-direction: column;
+  background: #0a0a0f;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  padding: 15px;
+}
+
+/*-----------------|   CARDS   |-----------------*/
+
+.registrationCard {
+  width: 25%;
+  padding-bottom: 1px;
+  margin: auto;
+  padding-top: 15px;
+  border-radius: 5px;
+  box-shadow: 0px 35px 60px #030310;
+  background: #20202f;
+  text-align: center;
+}
+
+.bodyMenuCard {
+  width: 90%;
+  background-color: #2f2f3d;
+  border-radius: 5px;
+  border: 2px solid #333345;
+  margin-top: 15px;
+  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  display:flex;
+  justify-content: left;
+}
+
+.bodyMenuCard:hover {
+  transform: translateY(-2px);
+  border-color: #7070a0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3),
+              0 0 15px rgba(112, 112, 160, 0.3);
+  background-color: #353545;
+}
+
+.bodyMenuCard:active {
+  transform: translateY(2px);
+  transition: 0.05s;
+}
+
+/*-----------------|   TITLES   |-----------------*/
+
+.title {
+  background: #20202f;
+  text-shadow: 0px 5px 1px #030303;
+  margin-bottom: 15px;
+}
+
+.customTitle {
+  font-size: 42px;
+  font-weight: bold;
+  text-align: center;
+  text-justify: center;
+  padding: 15px;
+  width:15%;
+  height:100%;
+  padding-left: 30px;
+  white-space: nowrap; 
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin: 15px 0px;
+}
+
+/*-----------------|   CUTTERS   |-----------------*/
+
+.cutter {
+  color: #333345;
+  width: 90%;
+  margin: auto;
+}
+
+/*-----------------|   TEXT-AREA   |-----------------*/
+
+.browser {
+  width: 90%;
+  background: #252535;
+  height:50px;
+  border-radius: 5px;
+  outline: none;
+  padding-left:15px;
+  font-size: 20px;
+}
+
+.inputText {
+  background: #1d1d2c;
+  border: 0px solid black;
+  text-align: center;
+  border-bottom: 1px solid #333345;
+  width: 50%;
+  height: 50px;
+  margin-top: 30px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  font-size: 12px;
+  color: #707075;
+}
+
+.inputText:hover {
+  border-bottom: 2px solid #7070a0;
+  width: 53%;
+  background: #252535;
+  transform: translateY(-1px);
+}
+
+.inputText:focus {
+  border-bottom: 2px solid #a0a0ff;
+  width: 60%;
+  font-size: 14px;
+  color: #d0d0d5;
+  background: #2a2a38;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.inputText:hover::placeholder {
+  color: #909095;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+}
+
+.inputText:focus::placeholder {
+  opacity: 0;
+  transform: translateX(20px);
+  transition: all 0.2s ease;
+}
+
+.inputText::placeholder {
+  color: #707075;
+  transition: all 0.2s ease;
+}
+
+/*-----------------|   BUTTON   |-----------------*/
+
+.button {
+  margin:7px;
+  margin-top: 30px;
+  width: 160px;
+  padding: 30px;
+  border: 0px;
+  border-radius: 5px;
+  background: #1a1a28;
+  color: #e0e0ff;
+  font-size: 16px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease; 
+}
+
+.button:hover {
+  background: #2a2a3a;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  letter-spacing: 3px;
+}
+
+.button:active {
+  transform: translateY(2px);
+  scale: 0.97;
+  transition: 0.05s;
+}
+
+.button:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  animation: shine 0.6s ease;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/*-----------------|   DROP-ZONE   |-----------------*/
+.dropZone {
+    transition: all 0.3s ease;
+}
+
+.dropZone.dragging {
+    border-color: #a0a0ff;
+    background-color: rgba(160, 160, 255, 0.1);
+    transform: scale(1.02);
+}
+
+.filesList {
+    margin-top: 20px;
+}
+
+.fileItem:hover {
+    background-color: #353545;
+    border-color: #7070a0;
+    transition: all 0.2s ease;
+}
+
+.filesList div::-webkit-scrollbar {
+    width: 4px;
+}
+
+.filesList div::-webkit-scrollbar-track {
+    background: #1d1d2c;
+}
+
+.filesList div::-webkit-scrollbar-thumb {
+    background: #7070a0;
+    border-radius: 2px;
+}
