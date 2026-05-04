@@ -26,7 +26,7 @@ async def init_model_info():
         while True:
             try:
                 response = await client.get(
-                    f"{ai_url}/model-info", headers=headers, timeout=20.0
+                    f"{ai_url}/model-info", headers=headers, timeout=5.0
                 )
                 response.raise_for_status()
 

@@ -196,6 +196,8 @@ async def upload_file(title: str, content, vec: list[float]):
                     (title, vec))
                 conn.commit()
 
+                print(title, f'{set(vec)} * {len(vec)}')
+
     except psycopg.errors.UniqueViolation:
         raise FileAlreadyExistsError(title)
     except Exception as e:
