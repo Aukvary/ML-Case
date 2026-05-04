@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, UploadFile, Form
 from fastapi.params import File
 from pydantic import BaseModel
@@ -116,12 +117,12 @@ async def search_request(request: SearchRequest):
     return compare_request(request_vec)
 
 @router.post("/upload_file")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: Annotated[UploadFile, File(...)]):
     from src.model_api import file_to_vec
     try:
         file_content = await file.read()
-        embedding = await file_to_vec(parse_file(file_content))
-        await db_upload_file(file.filename, file_content, embedding)
+        embedding = await file_to_vec(await parse_file(file.filename or "default", file_content))
+        await db_upload_file(file.filename or "default", file_content, embedding)
 
         return {
             "status": "File uploaded"
