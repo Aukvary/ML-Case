@@ -3,7 +3,10 @@ from contextlib import asynccontextmanager
 from src.model_api import router as model_router, init_model_info, ModelInfo
 from src.front_api import router as front_router
 from src.db_api import router as db_router, init_db
+<<<<<<< HEAD
 from fastapi.middleware.cors import CORSMiddleware # дипсик сказал чтобы файлы отправлялись
+=======
+>>>>>>> origin/master
 
 
 @asynccontextmanager
@@ -14,6 +17,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+<<<<<<< HEAD
 
 
 # Он сказал еще это добавить
@@ -26,6 +30,8 @@ app.add_middleware(
 )
 # Вот тут конец правок дикпика
 
+=======
+>>>>>>> origin/master
 app.include_router(model_router)
 app.include_router(front_router)
 app.include_router(db_router)

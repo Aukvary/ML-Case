@@ -1,7 +1,10 @@
 import { useState, useRef } from 'react';
+<<<<<<< HEAD
 import APIClient from '../apiClient';
 
 const api = new APIClient();
+=======
+>>>>>>> origin/master
 
 export default function Redactor() {
     const [isDragging, setIsDragging] = useState(false);
@@ -13,8 +16,14 @@ export default function Redactor() {
 
     // Уровни секретности
     const secretLevels = [
+<<<<<<< HEAD
         { value: 'ADMIN', label: 'ADMIN' },
         { value: 'USER', label: 'USER' }
+=======
+        { value: 'ADMIN', label: 'BLOTNOY' },
+        { value: 'ADMIN', label: 'PETUH' },
+        { value: 'USER', label: 'VODOLAZ' }
+>>>>>>> origin/master
     ];
 
     const handleDragOver = (e) => {
@@ -69,6 +78,7 @@ export default function Redactor() {
         }
 
         setIsUploading(true);
+<<<<<<< HEAD
         
         try {
             const result = await api.uploadFile(file, {
@@ -77,6 +87,16 @@ export default function Redactor() {
             });
             
             console.log('Результат загрузки:', result);
+=======
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('documentName', documentName);
+        formData.append('secretLevel', secretLevel);
+        
+        try {
+            console.log('Отправка:', { file: file.name, documentName, secretLevel });
+            await new Promise(resolve => setTimeout(resolve, 1500));
+>>>>>>> origin/master
             alert(`Document "${documentName}" successfully uploaded!\nLevel: ${secretLevel}`);
             
             // Очистка формы
@@ -87,7 +107,10 @@ export default function Redactor() {
                 fileInputRef.current.value = '';
             }
         } catch (error) {
+<<<<<<< HEAD
             console.error('Ошибка загрузки:', error);
+=======
+>>>>>>> origin/master
             alert('Error uploading file');
         } finally {
             setIsUploading(false);
