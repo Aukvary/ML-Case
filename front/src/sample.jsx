@@ -1,4 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+<<<<<<< HEAD
+=======
+import APIClient from './apiClient';
+
+// Создайте экземпляр клиента
+const api = new APIClient();
+>>>>>>> origin/front-api
 
 // ─────────────────────────────────────────────
 // CONFIG — меняй под свой бэкенд
