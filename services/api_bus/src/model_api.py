@@ -1,6 +1,6 @@
 import httpx
 import os
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 import asyncio
 from src.cfg import ai_url
 
@@ -45,4 +45,20 @@ async def file_to_vec(text: str) -> list[float]:
 
 
 async def request_to_vec(text) -> list[float]:
-    return [0.0 for _ in range(ModelInfo.dim)]
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                f"{ai_url}/vectorize",
+                json={"type": "query", "text": text},
+                headers=headers,
+                timeout=20.0
+            )
+            
+            if response.status_code == 503:
+                raise HTTPException(status_code=503, detail="ИИ-модель еще загружается")
+            
+            response.raise_for_status()
+            return response.json()["vector"]
+        except Exception as e:
+            print(f"[ERROR] request_to_vec failed: {e}")
+            raise HTTPException(status_code=500, detail="Ошибка векторизации запроса")
