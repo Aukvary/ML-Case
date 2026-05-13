@@ -76,8 +76,7 @@ def compare_request(word_vec: list[float]):
     with psycopg.connect(db_url) as conn:
         with conn.cursor() as cur:
             query = """
-                SELECT 
-                    title, 
+                SELECT title
                 FROM documents
                 WHERE embedding <=> %s::vector < 1
                 ORDER BY embedding <=> %s::vector ASC
@@ -195,8 +194,6 @@ async def upload_file(title: str, content, vec: list[float]):
                     """,
                     (title, vec))
                 conn.commit()
-
-                print(title, f'{set(vec)} * {len(vec)}')
 
     except psycopg.errors.UniqueViolation:
         raise FileAlreadyExistsError(title)

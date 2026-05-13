@@ -40,7 +40,7 @@ async def init_model_info():
                 await asyncio.sleep(2)
 
 
-async def file_to_vec(filename: str, text: str) -> dict:
+async def file_to_vec(text: str) -> list[float]:
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
@@ -55,11 +55,9 @@ async def file_to_vec(filename: str, text: str) -> dict:
             
             response.raise_for_status()
             data = response.json()
-            
-            return {
-                "docname": filename,
-                "vector": data["doc_vector"]
-            }
+
+            return data["vector"]
+
 
         except Exception as e:
             print(f"file_to_vec failed: {e}")

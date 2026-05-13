@@ -77,7 +77,7 @@ async def vectorize(
     # Запрос
     if data.type == "query":
         vector = engine.get_embedding(data.text, data.type)
-        return {"vector": vector, "dim": engine.dim}
+        return {"vector": vector}
     
     # Документ
     else:
@@ -89,4 +89,4 @@ async def vectorize(
 
         doc_vector = aggregate_vectors(all_vectors)
 
-        return {"type": "passage", "doc_vector": doc_vector, "dim": engine.dim}
+        return {"vector": doc_vector}
