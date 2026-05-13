@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 WORKDIR /app
 
-RUN sed -i 's/deb.debian.org/mirror.yandex.ru/g' /etc/apt/sources.list.d/debian.sources
+#RUN sed -i 's/deb.debian.org/mirror.yandex.ru/g' /etc/apt/sources.list.d/debian.sources
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -20,4 +20,4 @@ RUN pip install --no-cache-dir \
     -r requirements.txt
 
 COPY . .
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5002"]
+CMD ["python", "start_model.py"]
