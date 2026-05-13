@@ -40,8 +40,30 @@ async def init_model_info():
                 await asyncio.sleep(2)
 
 
-async def file_to_vec(text: str) -> list[float]:
-    return [0.0 for _ in range(ModelInfo.dim)]
+async def file_to_vec(filename: str, text: str) -> dict:
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                f"{ai_url}/vectorize",
+                json={"type": "passage", "text": text},
+                headers=headers,
+                timeout=30.0
+            )
+            
+            if response.status_code == 503:
+                raise HTTPException(status_code=503, detail="ИИ-модель еще загружается")
+            
+            response.raise_for_status()
+            data = response.json()
+            
+            return {
+                "docname": filename,
+                "vector": data["doc_vector"]
+            }
+
+        except Exception as e:
+            print(f"file_to_vec failed: {e}")
+            raise HTTPException(status_code=500, detail="Ошибка векторизации файла")
 
 
 async def request_to_vec(text) -> list[float]:

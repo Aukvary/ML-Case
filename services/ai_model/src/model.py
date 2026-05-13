@@ -17,7 +17,6 @@ class TextEmbedder:
 
         print(f"Загрузка модели из: {model_path}")
 
-        self.model = SentenceTransformer(model_path)
         self.dim = 384
 
     def get_embedding(self, text_val, type_val):
@@ -25,7 +24,6 @@ class TextEmbedder:
 
         embedding = self.model.encode(full_text)
 
-        # Нормализация (важно для косинусного сходства в базе)
         normal_embedding = embedding / np.linalg.norm(embedding)
         return normal_embedding.tolist()
     
@@ -34,3 +32,16 @@ class TextEmbedder:
         for i in range(0, len(text), chunk_size - overlap):
             chunks.append(text[i:i + chunk_size])
         return chunks
+    
+def aggregate_vectors(vectors):
+    np_vectors = np.array(vectors)
+        
+    summed_vector = np.sum(np_vectors, axis=0)
+    
+    norm = np.linalg.norm(summed_vector)
+    if norm > 0:
+        final_vector = summed_vector / norm
+    else:
+        final_vector = summed_vector
+            
+    return final_vector.tolist()
