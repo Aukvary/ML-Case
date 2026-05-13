@@ -4,7 +4,7 @@ from fastapi import FastAPI, Header, HTTPException, Depends
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
-from src.model import TextEmbedder
+from src.model import TextEmbedder, aggregate_vectors
 
 load_dotenv()
 INTERNAL_API_KEY = os.getenv("INTERNAL_API_KEY")
@@ -77,15 +77,16 @@ async def vectorize(
     # Запрос
     if data.type == "query":
         vector = engine.get_embedding(data.text, data.type)
-        return {"vector": vector, "dim": engine.dim}
+        return {"vector": vector}
     
     # Документ
     else:
         chunks = engine.split_text(data.text)
-        payload = []
+        all_vectors = []
         
         for chunk in chunks:
-            vector = engine.get_embedding(chunk, "passage")
-            payload.append({"content": chunk, "vector": vector})
+            all_vectors.append(engine.get_embedding(chunk, "passage"))
 
-        return {"type": "passage", "chunks": payload}
+        doc_vector = aggregate_vectors(all_vectors)
+
+        return {"vector": doc_vector}

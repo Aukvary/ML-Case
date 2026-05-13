@@ -74,5 +74,6 @@ services:
 
     volumes:
       - ./services/ai_model:/app
+      - ./services/ai_model/models:/app/models
 volumes:
   postgres_data:
