@@ -2,8 +2,6 @@ import subprocess
 import os
 from gigachat import GigaChat
 
-GIGACHAT_CREDENTIALS = "YOUR_AUTH_DATA_BASE64"
-
 def generate_typst_document(filename, content_data):
     typst_template = f"""
     #set page(margin: (x: 1.5cm, y: 1.5cm))
@@ -45,22 +43,27 @@ data = {
 generate_typst_document("test_result", data)
 
 if __name__ == "__main__":
-    with GigaChat(credentials=GIGACHAT_CREDENTIALS, verify_ssl_certs=False) as giga:
-    prompt = f"Напиши название и краткое содержание (3-4 абзаца) для документа на тему: {request.topic}. Ответ дай в формате: НАЗВАНИЕ: [текст] СОДЕРЖАНИЕ: [текст]"
-    response = giga.chat(prompt)
-    ai_text = response.choices[0].message.content
+    with GigaChat(
+        credentials="MDE5ZTIwYTAtZjg4OC03Y2Q3LTg1MDEtOGY5ZTEyYTcyNzljOjI5ZTk4NzE4LWEyMjAtNDIwOS1iYzNkLWNhYWUyZTNmYzMzZQ==",
+        scope="GIGACHAT_API_PERS",
+        model="GigaChat",
+        ca_bundle_file="./../russian_ca.crt"
+    ) as giga:
+        prompt = f"Напиши название и краткое содержание (3-4 абзаца) для документа на тему: {request.topic}. Ответ дай в формате: НАЗВАНИЕ: [текст] СОДЕРЖАНИЕ: [текст]"
+        response = giga.chat(prompt)
+        ai_text = response.choices[0].message.content
 
-    try:
-        title = ai_text.split("СОДЕРЖАНИЕ:")[0].replace("НАЗВАНИЕ:", "").strip()
-        body = ai_text.split("СОДЕРЖАНИЕ:")[1].strip()
-    except Exception:
-        title = f"Документ по теме {request.topic}"
-        body = ai_text
+        try:
+            title = ai_text.split("СОДЕРЖАНИЕ:")[0].replace("НАЗВАНИЕ:", "").strip()
+            body = ai_text.split("СОДЕРЖАНИЕ:")[1].strip()
+        except Exception:
+            title = f"Документ по теме {request.topic}"
+            body = ai_text
 
-    # 3. Генерируем уникальное имя файла
-    file_id = str(uuid.uuid4())[:8]
-    file_name = f"doc_{file_id}"
+        # 3. Генерируем уникальное имя файла
+        file_id = str(uuid.uuid4())[:8]
+        file_name = f"doc_{file_id}"
 
-    # 4. Запускаем создание PDF (в бэкграунде, чтобы не заставлять curl ждать долго)
-    background_tasks.add_task(compile_typst, file_name, title, body)
-    generate_typst_document("test_result", data)
+        # 4. Запускаем создание PDF (в бэкграунде, чтобы не заставлять curl ждать долго)
+        background_tasks.add_task(compile_typst, file_name, title, body)
+        generate_typst_document("test_result", data)
