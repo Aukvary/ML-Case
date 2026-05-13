@@ -6,4 +6,4 @@ __pycache__/
 logs/
 *.safetensors
 *.bin
-/.idea
+.idea
