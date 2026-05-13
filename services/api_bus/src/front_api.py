@@ -1,6 +1,7 @@
 from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, UploadFile, Form
 from fastapi.params import File
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from src.parser_api import parse_file
 from src.db_api import (
@@ -12,13 +13,17 @@ from src.db_api import (
     UserAlreadyExistsError,
     UserError,
     compare_request,
-    upload_file as db_upload_file, FileAlreadyExistsError
+    upload_file as db_upload_file,
+    FileAlreadyExistsError,
+    files_path
 )
 
 router = APIRouter(prefix="/front", tags=["Front Interaction"])
 
+
 class SearchRequest(BaseModel):
     request: str
+
 
 class FileUploadRequest(BaseModel):
     url: str
@@ -86,6 +91,7 @@ def update_user(
             detail="Internal server error"
         )
 
+
 @router.get("/check_auth")
 def check_auth(username: str, password: str):
     user = db_check_auth(username, password)
@@ -116,6 +122,7 @@ async def search_request(request: SearchRequest):
     request_vec = await request_to_vec(request.request)
     return compare_request(request_vec)
 
+
 @router.post("/upload_file")
 async def upload_file(file: Annotated[UploadFile, File(...)]):
     from src.model_api import file_to_vec
@@ -138,3 +145,12 @@ async def upload_file(file: Annotated[UploadFile, File(...)]):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Internal server error: {e}"
         )
+
+
+@router.get("/get_file")
+def get_file(title: str):
+    return FileResponse(
+        path=f'{files_path}/{title}',
+        filename=title,
+        media_type='application/pdf'
+    )
