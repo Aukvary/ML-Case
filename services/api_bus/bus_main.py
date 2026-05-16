@@ -27,14 +27,6 @@ app.include_router(model_router)
 app.include_router(front_router)
 app.include_router(db_router)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 @app.get("/")
 def read_root():
     return {"message": "Bus API is active"}

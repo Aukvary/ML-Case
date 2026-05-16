@@ -1,6 +1,3 @@
-// apiClient.js
-// Полный API клиент для взаимодействия с FastAPI бэкендом
-
 const API_BASE = "http://localhost:8000";
 
 class APIClient {
@@ -16,9 +13,7 @@ class APIClient {
 
     // Получение заголовков с авторизацией
     getHeaders() {
-        const headers = {
-            'Content-Type': 'application/json',
-        };
+        const headers = {};
         if (this.token) {
             headers['Authorization'] = `Bearer ${this.token}`;
         }
@@ -28,27 +23,60 @@ class APIClient {
     // Обработка ответов
     async handleResponse(response) {
         if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            throw new Error(error.detail || `HTTP ${response.status}: ${response.statusText}`);
+            let errorMessage;
+            try {
+                const error = await response.json();
+                errorMessage = error.detail || `HTTP ${response.status}: ${response.statusText}`;
+            } catch (e) {
+                errorMessage = await response.text().catch(() => response.statusText);
+            }
+            throw new Error(errorMessage);
         }
-        return response.json();
+        
+        // Проверяем, есть ли содержимое в ответе
+        const text = await response.text();
+        if (!text) return {};
+        
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            return { result: text };
+        }
     }
-
-    // ========== AI Model Interaction ==========
     
     /**
      * GET /model/status - Проверка статуса модели AI
-     * @returns {Promise<Object>} Статус модели (загружена/не загружена)
+     * @returns {Promise<string>} Статус модели
      */
     async getModelStatus() {
         const response = await fetch(`${this.baseURL}/model/status`, {
             method: 'GET',
-            headers: this.getHeaders()
+            headers: {
+                'Content-Type': 'application/json',
+            }
         });
         return this.handleResponse(response);
     }
 
-    // ========== Front Interaction ==========
+    /**
+     * POST /front/register_user - Регистрация нового пользователя
+     * @param {string} username - Имя пользователя
+     * @param {string} password - Пароль
+     * @returns {Promise<string>} Результат регистрации
+     */
+    async registerUser(username, password) {
+        const params = new URLSearchParams();
+        params.append('username', username);
+        params.append('password', password);
+
+        const response = await fetch(`${this.baseURL}/front/register_user?${params}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        return this.handleResponse(response);
+    }
 
     /**
      * PUT /front/update_user - Обновление данных пользователя
@@ -57,7 +85,7 @@ class APIClient {
      * @param {string} [updates.new_username] - Новое имя пользователя
      * @param {string} [updates.new_password] - Новый пароль
      * @param {string} [updates.new_role] - Новая роль
-     * @returns {Promise<Object>} Результат обновления
+     * @returns {Promise<string>} Результат обновления
      */
     async updateUser(username, updates) {
         const params = new URLSearchParams();
@@ -68,7 +96,9 @@ class APIClient {
 
         const response = await fetch(`${this.baseURL}/front/update_user?${params}`, {
             method: 'PUT',
-            headers: this.getHeaders()
+            headers: {
+                'Content-Type': 'application/json',
+            }
         });
         return this.handleResponse(response);
     }
@@ -77,7 +107,7 @@ class APIClient {
      * GET /front/check_auth - Проверка аутентификации пользователя
      * @param {string} username - Имя пользователя
      * @param {string} password - Пароль
-     * @returns {Promise<Object>} Результат проверки (обычно строка с результатом)
+     * @returns {Promise<string>} Результат проверки
      */
     async checkAuth(username, password) {
         const params = new URLSearchParams();
@@ -86,19 +116,23 @@ class APIClient {
 
         const response = await fetch(`${this.baseURL}/front/check_auth?${params}`, {
             method: 'GET',
-            headers: this.getHeaders()
+            headers: {
+                'Content-Type': 'application/json',
+            }
         });
         return this.handleResponse(response);
     }
 
     /**
      * GET /front/get_all_users - Получение списка всех пользователей
-     * @returns {Promise<Array>} Список пользователей
+     * @returns {Promise<string>} Список пользователей (строка)
      */
     async getAllUsers() {
         const response = await fetch(`${this.baseURL}/front/get_all_users`, {
             method: 'GET',
-            headers: this.getHeaders()
+            headers: {
+                'Content-Type': 'application/json',
+            }
         });
         return this.handleResponse(response);
     }
@@ -106,12 +140,14 @@ class APIClient {
     /**
      * POST /front/search_request - Семантический поиск документов
      * @param {string} request - Поисковый запрос
-     * @returns {Promise<Array>} Результаты поиска
+     * @returns {Promise<string>} Результаты поиска
      */
     async searchRequest(request) {
         const response = await fetch(`${this.baseURL}/front/search_request`, {
             method: 'POST',
-            headers: this.getHeaders(),
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body: JSON.stringify({ request })
         });
         return this.handleResponse(response);
@@ -120,14 +156,16 @@ class APIClient {
     /**
      * POST /front/upload_file - Загрузка файла
      * @param {File} file - Файл для загрузки
-     * @param {Object} options - Дополнительные параметры (если нужны)
-     * @returns {Promise<Object>} Результат загрузки
+     * @param {Object} options - Дополнительные параметры (не используются в текущем API)
+     * @returns {Promise<string>} Результат загрузки
      */
     async uploadFile(file, options = {}) {
+        console.log('Uploading file:', file.name, 'Size:', file.size);
+        
         const formData = new FormData();
         formData.append('file', file);
         
-        // Если есть дополнительные параметры, добавляем их
+        // Добавляем дополнительные поля, если бэкенд их ожидает
         if (options.documentName) {
             formData.append('documentName', options.documentName);
         }
@@ -135,93 +173,93 @@ class APIClient {
             formData.append('secretLevel', options.secretLevel);
         }
 
-        // Для multipart/form-data не устанавливаем Content-Type: application/json
-        const headers = {};
-        if (this.token) {
-            headers['Authorization'] = `Bearer ${this.token}`;
+        // Логируем отправляемые данные
+        for (let pair of formData.entries()) {
+            console.log('FormData entry:', pair[0], pair[1]);
         }
 
-        const response = await fetch(`${this.baseURL}/front/upload_file`, {
-            method: 'POST',
-            headers,
-            body: formData
+        try {
+            const response = await fetch(`${this.baseURL}/front/upload_file`, {
+                method: 'POST',
+                headers: this.getHeaders(),
+                body: formData
+            });
+            
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers);
+            
+            // Пробуем получить текст ответа для диагностики
+            const responseText = await response.text();
+            console.log('Response text:', responseText);
+            
+            if (!response.ok) {
+                throw new Error(`Server error (${response.status}): ${responseText || response.statusText}`);
+            }
+            
+            // Пробуем распарсить JSON если возможно
+            try {
+                return JSON.parse(responseText);
+            } catch (e) {
+                return { result: responseText };
+            }
+        } catch (error) {
+            console.error('Upload error details:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * GET /front/get_file - Получение файла по названию
+     * @param {string} title - Название файла
+     * @returns {Promise<string>} Содержимое файла
+     */
+    async getFile(title) {
+        const params = new URLSearchParams();
+        params.append('title', title);
+
+        const response = await fetch(`${this.baseURL}/front/get_file?${params}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
         });
         return this.handleResponse(response);
     }
 
     /**
-     * GET / - Корневой эндпоинт (информация о сервере)
-     * @returns {Promise<Object>} Базовая информация об API
+     * GET / - Корневой эндпоинт
+     * @returns {Promise<string>} Базовая информация об API
      */
     async getRoot() {
         const response = await fetch(`${this.baseURL}/`, {
             method: 'GET',
-            headers: this.getHeaders()
+            headers: {
+                'Content-Type': 'application/json',
+            }
         });
         return this.handleResponse(response);
     }
-
-    // ========== Комбинированные операции ==========
-
     /**
-     * Полная аутентификация пользователя (проверка + получение роли)
-     * @param {string} username - Имя пользователя
-     * @param {string} password - Пароль
-     * @returns {Promise<Object>} Результат аутентификации
+     * GET /front/get_file - Скачивание файла
+     * @param {string} title - Название файла
+     * @returns {Promise<Blob>} Блоб с файлом
      */
-    async authenticate(username, password) {
-        try {
-            const result = await this.checkAuth(username, password);
-            // В зависимости от формата ответа бэкенда
-            const isAuthenticated = result === "success" || result?.authenticated === true;
-            
-            let role = null;
-            if (isAuthenticated) {
-                // Если нужно получить роль, делаем запрос к информации о пользователе
-                const users = await this.getAllUsers();
-                const user = users.find(u => u.username === username);
-                role = user?.role || "USER";
-            }
-            
-            return {
-                authenticated: isAuthenticated,
-                role,
-                message: result
-            };
-        } catch (error) {
-            return {
-                authenticated: false,
-                role: null,
-                error: error.message
-            };
-        }
-    }
+    async downloadFile(title) {
+        const params = new URLSearchParams();
+        params.append('title', title);
 
-    /**
-     * Загрузка нескольких файлов последовательно
-     * @param {File[]} files - Массив файлов
-     * @param {Function} onProgress - Callback прогресса (current, total)
-     * @returns {Promise<Array>} Результаты загрузки
-     */
-    async uploadMultipleFiles(files, onProgress = null) {
-        const results = [];
-        for (let i = 0; i < files.length; i++) {
-            if (onProgress) {
-                onProgress(i + 1, files.length);
-            }
-            try {
-                const result = await this.uploadFile(files[i]);
-                results.push({ success: true, file: files[i].name, result });
-            } catch (error) {
-                results.push({ success: false, file: files[i].name, error: error.message });
-            }
+        const response = await fetch(`${this.baseURL}/front/get_file?${params}`, {
+            method: 'GET',
+            headers: this.getHeaders()
+        });
+        
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(`Download failed: ${error}`);
         }
-        return results;
+        
+        return response.blob();
     }
 }
 
-// Создаем экземпляр клиента
-const apiClient = new APIClient();
-
 export default APIClient;
-export { APIClient };
