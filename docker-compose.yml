@@ -17,7 +17,7 @@ services:
 
   db:
     image: pgvector/pgvector:pg16
-    container_name: my_postgres
+    container_name: data_base
     env_file:
       - .env
     environment:
@@ -27,7 +27,6 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./services/api_bus/init.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
 
   parser:
