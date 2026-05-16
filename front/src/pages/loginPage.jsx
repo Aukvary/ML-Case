@@ -1,30 +1,24 @@
 import { useState } from 'react';
-// Для перехода по страницам
 import { useNavigate } from 'react-router-dom';
-<<<<<<< HEAD
-=======
 import APIClient from '../apiClient';
->>>>>>> origin/front-api
 
 import eyeOpen from '../assets/eye_open.png';
 import eyeClose from '../assets/eye_close.png';
 
-<<<<<<< HEAD
-export default function LoginPage() {
-=======
 const api = new APIClient();
 
 export default function LoginPage() {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
->>>>>>> origin/front-api
     const [showPassword, setShowPassword] = useState(false);
     const [connectionStatus, setConnectionStatus] = useState('ready');
-    // Переключатель кнопки показа пароля
+    
+    const navigate = useNavigate();
+
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
-    // Функция для отображения статуса подключения
+
     const getStatusButton = () => {
         switch(connectionStatus) {
             case 'loading':
@@ -37,13 +31,12 @@ export default function LoginPage() {
                 return { text: '🔌', style: { backgroundColor: '#6c757d' }, title: 'Готов к подключению' };
         }
     };
-    // Функция проверки статуса подключения к БД
+
     const checkConnectionStatus = async () => {
         setConnectionStatus('loading');
         
         try {
-            // Простой GET запрос для проверки подключения
-            const response = await fetch('http://localhost:6000/api/status', {
+            const response = await fetch('http://localhost:8000/model/status', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -52,7 +45,6 @@ export default function LoginPage() {
             
             if (response.ok) {
                 setConnectionStatus('success');
-                // Через 2 секунды возвращаем исходный статус
                 setTimeout(() => {
                     setConnectionStatus('ready');
                 }, 2000);
@@ -70,24 +62,14 @@ export default function LoginPage() {
             }, 2000);
         }
     };
-    // Функция для навигации
-    const navigate = useNavigate();
-    // Функция перехода в main
-<<<<<<< HEAD
-    const handleLogin = () => {
-        // Здесь будет API запрос в БД и проверка LOGIN/PASSWORD
-        
-        navigate('/main');  // Переход на страницу MainPage
-=======
+
     const handleLogin = async () => {
-        // Проверка на admin/admin (запасной вариант)
         if (login === 'admin' && password === 'admin') {
             localStorage.setItem('username', login);
             navigate('/main');
             return;
         }
         
-        // Иначе пытаемся через API
         if (!login.trim() || !password.trim()) {
             alert('Введите логин и пароль');
             return;
@@ -118,20 +100,13 @@ export default function LoginPage() {
                 setConnectionStatus('ready');
             }, 2000);
         }
->>>>>>> origin/front-api
     };
 
     return (
         <div className="container">
             <div className="registrationCard">
                 <h1 className="title">LOSE//LINE</h1>
-<<<<<<< HEAD
-                <hr className="cutter" style={{'margin-bottom':'60px'}} />
-                <input type="login" placeholder="LOGIN" className="inputText"></input>
-                <br />
-                <input type={showPassword ? "text" : "password"} placeholder="PASSWORD" className="inputText"></input>
-=======
-                <hr className="cutter" style={{'marginBottom':'60px'}} />
+                <hr className="cutter" style={{marginBottom: '60px'}} />
                 <input 
                     type="text" 
                     placeholder="LOGIN" 
@@ -149,26 +124,14 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
                 />
->>>>>>> origin/front-api
                 <br />
-                <div style={{'display':'flex', 'alignItems':'space-between', 'justifyContent':'center'}}>
+                <div style={{display: 'flex', alignItems: 'space-between', justifyContent: 'center'}}>
                     <button className="button" onClick={handleLogin}>LOGIN</button>
-                    <button className="button" style={{'padding':'15px', 'width':'60px'}} onClick={togglePasswordVisibility}>
-<<<<<<< HEAD
-                        <img src={showPassword ? eyeOpen : eyeClose }  style={{'width':'25px'}}></img>
+                    <button className="button" style={{padding: '15px', width: '60px'}} onClick={togglePasswordVisibility}>
+                        <img src={showPassword ? eyeOpen : eyeClose} style={{width: '25px'}} alt="toggle password"/>
                     </button>
                 </div>
-                <input type="text" placeholder={getStatusButton} style={{'background':'#20202f', 'border':'0px solid black'}}></input>
-                <hr className="cutter" style={{'margin-top':'60px', 'margin-bottom':'30px'}}/>
-=======
-                        <img src={showPassword ? eyeOpen : eyeClose} style={{'width':'25px'}} alt="toggle password"/>
-                    </button>
-                </div>
-                <hr className="cutter" style={{'marginTop':'60px', 'marginBottom':'30px'}}/>
-                <div style={{color: '#707075', fontSize: '11px', marginBottom: '15px'}}>
-                    Тестовый вход: admin / admin
-                </div>
->>>>>>> origin/front-api
+                <hr className="cutter" style={{marginTop: '60px', marginBottom: '30px'}}/>
             </div>
         </div>
     );

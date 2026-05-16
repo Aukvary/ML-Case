@@ -1,10 +1,7 @@
 import { useState, useRef } from 'react';
-<<<<<<< HEAD
-=======
 import APIClient from '../apiClient';
 
 const api = new APIClient();
->>>>>>> origin/front-api
 
 export default function Redactor() {
     const [isDragging, setIsDragging] = useState(false);
@@ -16,14 +13,8 @@ export default function Redactor() {
 
     // Уровни секретности
     const secretLevels = [
-<<<<<<< HEAD
-        { value: 'ADMIN', label: 'BLOTNOY' },
-        { value: 'ADMIN', label: 'PETUH' },
-        { value: 'USER', label: 'VODOLAZ' }
-=======
         { value: 'ADMIN', label: 'ADMIN' },
         { value: 'USER', label: 'USER' }
->>>>>>> origin/front-api
     ];
 
     const handleDragOver = (e) => {
@@ -78,16 +69,6 @@ export default function Redactor() {
         }
 
         setIsUploading(true);
-<<<<<<< HEAD
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('documentName', documentName);
-        formData.append('secretLevel', secretLevel);
-        
-        try {
-            console.log('Отправка:', { file: file.name, documentName, secretLevel });
-            await new Promise(resolve => setTimeout(resolve, 1500));
-=======
         
         try {
             const result = await api.uploadFile(file, {
@@ -96,7 +77,6 @@ export default function Redactor() {
             });
             
             console.log('Результат загрузки:', result);
->>>>>>> origin/front-api
             alert(`Document "${documentName}" successfully uploaded!\nLevel: ${secretLevel}`);
             
             // Очистка формы
@@ -107,10 +87,7 @@ export default function Redactor() {
                 fileInputRef.current.value = '';
             }
         } catch (error) {
-<<<<<<< HEAD
-=======
             console.error('Ошибка загрузки:', error);
->>>>>>> origin/front-api
             alert('Error uploading file');
         } finally {
             setIsUploading(false);
@@ -143,7 +120,7 @@ export default function Redactor() {
                     <strong>Drag and drop file</strong> or click to select
                 </p>
                 <p style={{ color: '#707075', fontSize: '11px', marginTop: '5px' }}>
-                    Supported formats: PDF, DOCX, TXT
+                    Supported formats: PDF
                 </p>
                 <input
                     ref={fileInputRef}

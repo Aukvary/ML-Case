@@ -20,7 +20,6 @@ class User(BaseModel):
 class SearchResponse(BaseModel):
     title: str
 
-
 class UserError(Exception):
     def __init__(self, user: str = None, message: str = None):
         self.user = user
@@ -55,11 +54,11 @@ def init_db(dim: int):
         with conn.cursor() as cur:
             cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
             cur.execute(f"""
-                    CREATE TABLE IF NOT EXISTS documents (
-                        title TEXT PRIMARY KEY, 
-                        embedding vector({dim})
-                    );
-                """)
+                CREATE TABLE IF NOT EXISTS documents (
+                    title TEXT PRIMARY KEY, 
+                    embedding vector({dim})
+                );
+            """)
 
             cur.execute("""
                     CREATE TABLE IF NOT EXISTS users (
@@ -75,18 +74,15 @@ def init_db(dim: int):
 def compare_request(word_vec: list[float]):
     with psycopg.connect(db_url) as conn:
         with conn.cursor() as cur:
-            query = """
-                SELECT 
-                    title, 
+            cur.execute("""
+                SELECT title
                 FROM documents
                 WHERE embedding <=> %s::vector < 1
                 ORDER BY embedding <=> %s::vector ASC
-            """
-
-            cur.execute(query, (word_vec, word_vec))
+            """, (word_vec, word_vec))
             results = cur.fetchall()
 
-            return [SearchResponse(**row) for row in results]
+            return [SearchResponse(title=row[0]) for row in results]
 
 
 def add_user(username: str, password: str):
@@ -195,8 +191,6 @@ async def upload_file(title: str, content, vec: list[float]):
                     """,
                     (title, vec))
                 conn.commit()
-
-                print(title, f'{set(vec)} * {len(vec)}')
 
     except psycopg.errors.UniqueViolation:
         raise FileAlreadyExistsError(title)

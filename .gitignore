@@ -6,4 +6,5 @@ __pycache__/
 logs/
 *.safetensors
 *.bin
-/.idea
+.idea/
+/services/api_bus/files/
