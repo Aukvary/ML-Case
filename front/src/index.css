@@ -46,8 +46,6 @@ body::before {
                    350px 350px, 550px 550px, 400px 400px, 480px 480px, 650px 650px;
   animation: starsFall 8s linear infinite;
   pointer-events: none;
-  filter: drop-shadow(0 0 10px rgba(160,160,255,1)) 
-          drop-shadow(0 0 20px rgba(100,100,200,0.7));
   opacity: 0.9;
 }
 

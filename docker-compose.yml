@@ -52,11 +52,6 @@ services:
 
     environment:
       - CHOKIDAR_USEPOLLING=true
-
-    volumes:
-      - ./front:/app
-      - /app/node_modules
-      - /app/.vite
     stdin_open: true
     tty: true
 
