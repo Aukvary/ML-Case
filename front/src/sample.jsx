@@ -1,11 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-<<<<<<< HEAD
 import APIClient from './apiClient';
 
 // Создайте экземпляр клиента
 const api = new APIClient();
-=======
->>>>>>> origin/master
 
 // ─────────────────────────────────────────────
 // CONFIG — меняй под свой бэкенд
@@ -172,7 +169,7 @@ function ParticlesBg() {
   useEffect(() => {
     const c = ref.current, ctx = c.getContext("2d");
     let raf;
-    const N = 38, MAX = 320;
+    const N = 10, MAX = 320;
     const resize = () => { c.width = window.innerWidth; c.height = window.innerHeight; };
     resize();
     window.addEventListener("resize", resize);
